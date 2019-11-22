@@ -98,9 +98,8 @@ export default {
     loadMore(){
       // console.log("加载更多")
       this.getHomeGoods(this.currentType)
-      this.$refs.homeScroll.finishPullUp()
-      
-      this.$refs.scroll.scroll.refresh()
+
+      // this.$refs.scroll.scroll.refresh()
 
     },
     /**
@@ -118,6 +117,8 @@ export default {
         // console.log(res)
         this.goods[type].list.push(...res.data.data.list);
         this.goods[type].page += 1;
+        
+        this.$refs.homeScroll.finishPullUp()
 
       });
     }
