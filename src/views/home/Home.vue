@@ -3,16 +3,17 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
+    <tab-control class="tab-control2" ref="tabControl2" :titles="['流行','新歌','精选']" @tabClick="tabClick" v-show="tabControlisShow" :class="{tabControlclone: tabControlisShow}"></tab-control>
     <scroll class="home-scroll" 
-            ref="homeScroll" 
+            ref="scroll" 
             :probeType="3" 
             @scroll="homeScroll" 
             :pullUpLoad="true" 
             @pullingUp="loadMore">
-      <home-swiper class="home-swiper" :banners="banners"></home-swiper>
+      <home-swiper class="home-swiper" :banners="banners" @homeSwiperimageLoad="homeSwiperimageLoad"></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
       <feature-view></feature-view>
-      <tab-control class="tab-control" :titles="['流行','新歌','精选']" @tabClick="tabClick"></tab-control>
+      <tab-control class="tab-control1" ref="tabControl1" :titles="['流行','新歌','精选']" @tabClick="tabClick"></tab-control>
       <goods-list :pops="showGoods"></goods-list>
     </scroll>
     <back-top @click.native="backClick" v-show="backTopIsTrue"></back-top>
@@ -31,6 +32,7 @@ import GoodsList from "components/content/goods/GoodsList";
 import BackTop from "components/content/backTop/BackTop";
 
 import { getHomeMultidata, getHomeGoods } from "network/home";
+// import { debounce } from "@/common/utils";
 
 export default {
   name: "Home",
@@ -44,7 +46,9 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: "pop",
-      backTopIsTrue: false
+      backTopIsTrue: false,
+      tabOffsetTop: 0,
+      tabControlisShow: false
     };
   },
   computed: {
@@ -69,6 +73,14 @@ export default {
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
+    
+  },
+  mounted() {
+    //3.监听item中图片加载完成
+    this.$bus.$on("imageLoad",() => {
+      this.$refs.scroll.refresh()
+      console.log("待防抖优化")
+    })
   },
   methods: {
     /**
@@ -86,24 +98,28 @@ export default {
           this.currentType = "sell";
           break;
       }
+      // console.log(this.$refs.tabControl1.currentIndex)  老师加了这两句话，我试了，好像没必要加
+      // console.log(this.$refs.tabControl2.currentIndex)
     },
-
     backClick() {
-      this.$refs.homeScroll.scrollTo(0, 0, 500);
+      this.$refs.scroll.scrollTo(0, 0, 500);
     },
-
     homeScroll(position) {
       this.backTopIsTrue = -position.y > 1000;
+      
+      this.tabControlisShow = -position.y > this.tabOffsetTop
     },
     loadMore(){
       // console.log("加载更多")
       this.getHomeGoods(this.currentType)
-
-        this.$refs.homeScroll.finishPullUp()
-
-      // this.$refs.scroll.scroll.refresh()
-
+      //反馈加载完成
+      this.$refs.scroll.finishPullUp()
     },
+    homeSwiperimageLoad(){
+      this.tabOffsetTop = this.$refs.tabControl1.$el.offsetTop
+    },
+
+
     /**
      * 网络请求相关的方法
      */
@@ -116,7 +132,7 @@ export default {
     getHomeGoods(type) {
       const page = this.goods[type].page + 1;
       getHomeGoods(type, page).then(res => {
-        // console.log(res)
+        console.log(res)
         this.goods[type].list.push(...res.data.data.list);
         this.goods[type].page += 1;
 
@@ -131,36 +147,24 @@ export default {
 </script>
 
 <style scope>
-#home {
-  padding-top: 44px;
-  /* height: 100vh; */
-}
-.home-nav {
-  background-color: var(--color-tint);
-  color: white;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-/* .tab-control {
-    position: sticky;
-    top: 44px;
-    background-color: #fff;
-    z-index: 1;
-  } */
-.home-scroll {
-  position: absolute;
-  top: 44px;
-  bottom: 49px;
-  left: 0;
-  right: 0;
-}
+  #home {
 
-/* .home-scroll {
-    height: calc(100% - 93px);
-    overflow: hidden;
-    margin-top:44px;
-  } */
+  }
+  .home-nav {
+    background-color: var(--color-tint);
+    color: white;
+    width: 100%;
+    position: relative;
+  }
+  .tabControlclone{
+    position: relative;
+    z-index: 9;
+  }
+  .home-scroll {
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
+  }
 </style>

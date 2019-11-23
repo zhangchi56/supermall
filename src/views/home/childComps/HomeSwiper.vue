@@ -3,7 +3,7 @@
     <!-- slides -->
     <swiper-slide v-for="(item,index) of banners" :key="index">
       <a :href="item.link">
-        <img :src="item.image" alt="">
+        <img :src="item.image" alt="" @load="imageLoad">
       </a>
     </swiper-slide>
 
@@ -20,15 +20,17 @@ import { swiper, swiperSlide } from 'vue-awesome-swiper'
 
 export default {
   name: "HomeSwiper",
+  props: ["banners"],
   data() {
     return {
+      isLoad: false,
       swiperOption: {
-          // some swiper options/callbacks
-          // 所有的参数同 swiper 官方 api 参数
-          // ...
-          pagination: {
-          el: '.swiper-pagination',
-        },
+            // some swiper options/callbacks
+            // 所有的参数同 swiper 官方 api 参数
+            // ...
+            pagination: {
+            el: '.swiper-pagination',
+          },
         }
     }
   },
@@ -36,10 +38,18 @@ export default {
       swiper,
       swiperSlide
   },
-  props: ["banners"],
+  methods: {
+    imageLoad(){
+      if(!this.isLoad){
+        this.$emit('homeSwiperimageLoad')
+        this.isLoad = true
+        // console.log("4次打印无法解决")
+      }
+    }
+  },
   created() {
       // console.log(this.banner)
-  }
+  },
 }
 </script>
 

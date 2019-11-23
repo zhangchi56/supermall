@@ -36,6 +36,7 @@
     font-size: 16px;
     height: 40px;
     line-height: 40px;
+    background-color: #fff;
   }
   .tab-control span {
     padding: 5px;
