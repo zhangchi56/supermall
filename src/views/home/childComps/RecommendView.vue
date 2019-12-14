@@ -12,7 +12,14 @@
 <script>
 export default {
     name: "RecommendView",
-    props: ["recommends"]
+    props: {
+      recommends:{
+        type: Array,
+        default() {
+          return []
+        }
+      }
+    }
 }
 </script>
 

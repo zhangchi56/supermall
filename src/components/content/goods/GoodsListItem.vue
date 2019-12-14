@@ -1,6 +1,6 @@
 <template>
-  <div class="goods" @click="toDetail">
-    <img :src="goodsItem.show.img" alt="" @load="imageLoad">
+  <div v-if="Object.keys(goodsItem).length !== 0" class="goods" @click="toDetail">
+    <img :src="goodsItemImg" alt="" @load="imageLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -11,15 +11,31 @@
 
 <script>
   export default {
-    props: ["goodsItem"],
+    props: {
+      goodsItem:{
+        type: Object,
+        default() {
+          return []
+        }
+      }
+    },
     methods: {
       imageLoad() {
-        this.$bus.$emit("imageLoad")
+        if(this.$route.path == "/home"){
+          this.$bus.$emit("HomeimageLoad")
+        }else if(this.$route.path == "/detail"){
+          this.$bus.$emit("DetailImageLoad")
+        }
       },
       toDetail(){
         this.$router.push('/detail/'+this.goodsItem.iid)
       }
     },
+    computed:{
+      goodsItemImg(){
+        return this.goodsItem.image || this.goodsItem.show.img
+      }
+    }
   }
 </script>
 

@@ -29,10 +29,10 @@ import NavBar from "components/common/navbar/NavBar";
 import Scroll from "components/common/scroll/Scroll";
 import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
-import BackTop from "components/content/backTop/BackTop";
+// import BackTop from "components/content/backTop/BackTop";
 
 import { getHomeMultidata, getHomeGoods } from "network/home";
-// import { debounce } from "@/common/utils";
+import { backTop } from "@/common/mixin";
 
 export default {
   name: "Home",
@@ -47,10 +47,10 @@ export default {
       },
       currentType: "pop",
       backTopIsTrue: false,
-      tabOffsetTop: 0,
-      tabControlisShow: false
+      tabOffsetTop: 0
     };
   },
+  mixins: [backTop],
   computed: {
     showGoods() {
       return this.goods[this.currentType].list;
@@ -64,7 +64,6 @@ export default {
     TabControl,
     GoodsList,
     Scroll,
-    BackTop
   },
   created() {
     //1.请求多个数据
@@ -73,14 +72,17 @@ export default {
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
-    
   },
   mounted() {
     //3.监听item中图片加载完成
-    this.$bus.$on("imageLoad",() => {
+    this.$bus.$on("HomeimageLoad",() => {
       this.$refs.scroll.refresh()
       console.log("待防抖优化")
     })
+  },
+  activated() {
+    this.$refs.scroll.refresh()
+    console.log("首页scroll获取异常，时好时坏")
   },
   methods: {
     /**
@@ -98,16 +100,11 @@ export default {
           this.currentType = "sell";
           break;
       }
-      // console.log(this.$refs.tabControl1.currentIndex)  老师加了这两句话，我试了，好像没必要加
-      // console.log(this.$refs.tabControl2.currentIndex)
-    },
-    backClick() {
-      this.$refs.scroll.scrollTo(0, 0, 500);
-    },
-    homeScroll(position) {
-      this.backTopIsTrue = -position.y > 1000;
-      
-      this.tabControlisShow = -position.y > this.tabOffsetTop
+      this.$refs.tabControl1.current = index
+      this.$refs.tabControl2.current = index
+      console.log(this.$refs.tabControl1.current)
+      console.log(this.$refs.tabControl2.current)
+      console.log(`我是当前统一的索引${index}`)
     },
     loadMore(){
       // console.log("加载更多")
@@ -118,7 +115,11 @@ export default {
     homeSwiperimageLoad(){
       this.tabOffsetTop = this.$refs.tabControl1.$el.offsetTop
     },
-
+    homeScroll(position) {
+      this.backTopIsTrue = -position.y > 1000;
+      this.tabControlisShow = -position.y > this.tabOffsetTop
+    },
+    
 
     /**
      * 网络请求相关的方法
@@ -132,7 +133,7 @@ export default {
     getHomeGoods(type) {
       const page = this.goods[type].page + 1;
       getHomeGoods(type, page).then(res => {
-        console.log(res)
+        // console.log(res)
         this.goods[type].list.push(...res.data.data.list);
         this.goods[type].page += 1;
 
@@ -140,15 +141,12 @@ export default {
       });
     }
   },
-  updated() {
-    // console.log(this.currentType)
-  },
 };
 </script>
 
 <style scope>
-  #home {
-
+  #home{
+    height: 100hv;
   }
   .home-nav {
     background-color: var(--color-tint);

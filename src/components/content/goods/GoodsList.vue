@@ -14,14 +14,15 @@ import GoodsListItem from 'components/content/goods/GoodsListItem'
       pops: {
         type: Array,
         default() {
-          return {
-
-          }
+          return []
         }
       }
     },
     components: {
       GoodsListItem
+    },
+    mounted(){
+      
     }
   }
 </script>

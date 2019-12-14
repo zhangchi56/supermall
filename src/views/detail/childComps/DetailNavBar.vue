@@ -24,10 +24,12 @@
     methods: {
       CurrentIndex(index){
         this.currentIndex = index
+        this.$emit("currentTitle",index)
       },
       NavBack(){
         this.$router.back()
       }
+
     },
   }
 </script>
